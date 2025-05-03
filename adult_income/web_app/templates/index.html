@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+  .title {
+    text-align: center;
+    margin: 20px 0;
+  }
+  .section {
+    margin: 20px 0;
+    text-align: left;
+  }
+  .section-buttons {
+    display: flex;
+    justify-content: flex-start;
+  }
+  .section-buttons .btn {
+    margin: 0 5px;
+  }
+</style>
+<div class="container">
+    <h1 class="title">Adult Income</h1>
+    <form id="predict-form" enctype="multipart/form-data">
+        <div class="mb-3">
+            <label for="model-id-select" class="form-label">Model</label>
+            <select class="form-control" id="model-id-select" aria-label="Default select example" required>
+                <option value="" selected>Select</option>
+                <option value="1">Logistic Regression</option>
+                <option value="2">Random Forest</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="age-input" class="form-label">Age</label>
+            <input type="number" class="form-control" id="age-input" required>
+        </div>
+        <div class="mb-3">
+            <label for="work-class-select" class="form-label">Work Class</label>
+            <select class="form-control" id="work-class-select" aria-label="Default select example" required>
+                <option value="" selected>Select</option>
+                {% for i in data["work_class"] %}
+                    <option value="{{i}}">{{i}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="fnlwgt-input" class="form-label">Fnlwgt</label>
+            <input type="number" class="form-control" id="fnlwgt-input" required>
+        </div>
+        <div class="mb-3">
+            <label for="education-select" class="form-label">Education</label>
+            <select class="form-control" id="education-select" aria-label="Default select example" required>
+                <option value="" selected>Select</option>
+                {% for i, v in zip(data["education_num"], data["education"]) %}
+                    <option value="{{i}}">{{v}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="marital-status-select" class="form-label">Marital Status</label>
+            <select class="form-control" id="marital-status-select" aria-label="Default select example" required>
+                <option value="" selected>Select</option>
+                {% for i in data["marital_status"] %}
+                    <option value="{{i}}">{{i}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="occupation-select" class="form-label">Occupation</label>
+            <select class="form-control" id="occupation-select" aria-label="Default select example" required>
+                <option value="" selected>Select</option>
+                {% for i in data["occupation"] %}
+                    <option value="{{i}}">{{i}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="relationship-select" class="form-label">Relationship</label>
+            <select class="form-control" id="relationship-select" aria-label="Default select example" required>
+                <option value="" selected>Select</option>
+                {% for i in data["relationship"] %}
+                    <option value="{{i}}">{{i}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="race-select" class="form-label">Race</label>
+            <select class="form-control" id="race-select" aria-label="Default select example" required>
+                <option value="" selected>Select</option>
+                {% for i in data["race"] %}
+                    <option value="{{i}}">{{i}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="sex-select" class="form-label">Sex</label>
+            <select class="form-control" id="sex-select" aria-label="Default select example" required>
+                <option value="" selected>Select</option>
+                {% for i in data["sex"] %}
+                    <option value="{{i}}">{{i}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="capital-gain-input" class="form-label">Capital gain</label>
+            <input type="number" class="form-control" id="capital-gain-input" required>
+        </div>
+        <div class="mb-3">
+            <label for="capital-loss-input" class="form-label">Capital loss</label>
+            <input type="number" class="form-control" id="capital-loss-input" required>
+        </div>
+        <div class="mb-3">
+            <label for="hours-per-week-input" class="form-label">Hours per week</label>
+            <input type="number" class="form-control" id="hours-per-week-input" required>
+        </div>
+        <div class="mb-3">
+            <label for="native-country-select" class="form-label">Native Country</label>
+            <select class="form-control" id="native-country-select" aria-label="Default select example" required>
+                <option value="" selected>Select</option>
+                {% for i in data["native_country"] %}
+                    <option value="{{i}}">{{i}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <button type="submit" class="btn btn-primary w-100">Predict</button>
+        </div>
+    </form>
+</div>
+<script>
+document.getElementById("predict-form").onsubmit = async function(event) {
+    event.preventDefault();
+    
+    // Get parameters
+    const model_id = document.getElementById("model-id-select").value;
+    const age = document.getElementById("age-input").value;
+    const work_class = document.getElementById("work-class-select").value;
+    const fnlwgt = document.getElementById("fnlwgt-input").value;
+    const education_num = document.getElementById("education-select").value;
+    const education = document.getElementById("education-select").options[document.getElementById("education-select").selectedIndex].text;
+    const marital_status = document.getElementById("marital-status-select").value;
+    const occupation = document.getElementById("occupation-select").value;
+    const relationship = document.getElementById("relationship-select").value;
+    const race = document.getElementById("race-select").value;
+    const sex = document.getElementById("sex-select").value;
+    const capital_gain = document.getElementById("capital-gain-input").value;
+    const capital_loss = document.getElementById("capital-loss-input").value;
+    const hours_per_week = document.getElementById("hours-per-week-input").value;
+    const native_country = document.getElementById("native-country-select").value;
+
+    let form_data = new FormData();
+    form_data.append("model_id", model_id);
+    form_data.append("age", age);
+    form_data.append("work_class", work_class);
+    form_data.append("fnlwgt", fnlwgt);
+    form_data.append("education_num", education_num);
+    form_data.append("education", education);
+    form_data.append("marital_status", marital_status);
+    form_data.append("occupation", occupation);
+    form_data.append("relationship", relationship);
+    form_data.append("race", race);
+    form_data.append("sex", sex);
+    form_data.append("capital_gain", capital_gain);
+    form_data.append("capital_loss", capital_loss);
+    form_data.append("hours_per_week", hours_per_week);
+    form_data.append("native_country", native_country);
+    
+    // Call backend
+    const response = await fetch("/predict", {
+        method: "POST",
+        body: form_data
+    });
+
+    // If response is ok
+    if (response.ok) {
+        const json_response = await response.json();
+
+        alert(`Prediction: ${json_response.prediction}`);
+    }
+}
+</script>
+{% endblock %}
