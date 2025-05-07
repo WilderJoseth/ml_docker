@@ -1,17 +1,35 @@
+import os
 import numpy as np
 import pandas as pd
 
-def get_transformer(path_transformer):
+# Input object
+PATH_INPUT = os.path.join(os.getcwd(), "input")
+
+def get_transformer(transformer_name):
     '''
         Load transformer files
     '''
     import joblib
     
-    with open(path_transformer, "rb") as transformer_file:
+    with open(os.path.join(PATH_INPUT, "transformers", transformer_name), "rb") as transformer_file:
         transformer = joblib.load(transformer_file)
 
     return transformer
 
+def get_model(model_name):
+    '''
+        Load model files
+    '''
+    import joblib
+    
+    with open(os.path.join(PATH_INPUT, "models", model_name), "rb") as model_file:
+        model = joblib.load(model_file)
+
+    return model
+
+def get_data():
+    return pd.read_csv(os.path.join(PATH_INPUT, "data", "adult_cleaned.csv"))
+ 
 def prepare(data, categorical_transformer, numeric_transformer):
     '''
         Transform input data

@@ -1,67 +1,65 @@
 import os
-import mlflow
 
 PATH_TEMP = os.path.join(os.getcwd(), "temp")
+PATH_INPUT = os.path.join(os.getcwd(), "input")
+PATH_OUTPUT = os.path.join(os.getcwd(), "output")
 
-def save_mlflow_artifact_dataframe_info(artifact_path, df):
+def verify_paths():
+    '''
+        Verify if paths exist, otherwise create directories
+    '''
+    print("\n------------------ Start verifying base paths ------------------")
+    if not os.path.exists(PATH_INPUT):
+        os.mkdir(PATH_INPUT)
+    if not os.path.exists(PATH_OUTPUT):
+        os.mkdir(PATH_OUTPUT)
+    if not os.path.exists(PATH_TEMP):
+        os.mkdir(PATH_TEMP)
+    if not os.path.exists(os.path.join(PATH_OUTPUT, "artifacts")):
+        os.mkdir(os.path.join(PATH_OUTPUT, "artifacts"))
+    print("\n------------------ End verifying base paths ------------------")
+
+def save_dataframe_info(directory_name, df):
     '''
         Save dataframe information like: shape, info and a sample
     '''
 
+    # Verify artifacts path
+    if not os.path.exists(os.path.join(PATH_OUTPUT, "artifacts", directory_name)):
+        os.mkdir(os.path.join(PATH_OUTPUT, "artifacts", directory_name))
+
     # Create information file
-    with open(os.path.join(PATH_TEMP, "df_info.txt"), "w") as f:
+    with open(os.path.join(PATH_OUTPUT, "artifacts", directory_name, "df_info.txt"), "w") as f:
         f.write(f"\nShape: {df.shape}")
         f.write(f"\nInfo:")
         df.info(buf = f)
 
     # Create sample file
-    df.head().to_csv(os.path.join(PATH_TEMP, "df_head.csv"), index = False)
+    df.head().to_csv(os.path.join(PATH_OUTPUT, "artifacts", directory_name, "df_head.csv"), index = False)
 
-    # Save artifacs in mlflow repository
-    mlflow.log_artifact(os.path.join(PATH_TEMP, "df_info.txt"), artifact_path = artifact_path)
-    mlflow.log_artifact(os.path.join(PATH_TEMP, "df_head.csv"), artifact_path = artifact_path)
-
-    # Remove files
-    os.remove(os.path.join(PATH_TEMP, "df_info.txt"))
-    os.remove(os.path.join(PATH_TEMP, "df_head.csv"))
-
-def save_mlflow_artifact_dataframe(artifact_path, df, name, index = False):
-    '''
-        Save dataframe
-    '''
-
-    # Create file
-    df.to_csv(os.path.join(PATH_TEMP, f"{name}.csv"), index = index)
-
-    # Save artifacs in mlflow repository
-    mlflow.log_artifact(os.path.join(PATH_TEMP, f"{name}.csv"), artifact_path = artifact_path)
-
-    # Remove files
-    os.remove(os.path.join(PATH_TEMP, f"{name}.csv"))
-
-def save_mlflow_artifact_columns_info(artifact_path, df, title, name, is_print = False):
+def save_columns_info(directory_name, df, title, name, is_print = False):
     '''
         Save columns information
     '''
-    
-    # Create file
-    print(f"\n{title}: \n{df}", file = open(os.path.join(PATH_TEMP, f"{name}.txt"), "w"))
+    # Verify artifacts path
+    if not os.path.exists(os.path.join(PATH_OUTPUT, "artifacts", directory_name)):
+        os.mkdir(os.path.join(PATH_OUTPUT, "artifacts", directory_name))
 
-    # Save artifacs in mlflow repository
-    mlflow.log_artifact(os.path.join(PATH_TEMP, f"{name}.txt"), artifact_path = artifact_path)
+    # Create file
+    print(f"\n{title}: \n{df}", file = open(os.path.join(PATH_OUTPUT, "artifacts", directory_name, f"{name}.txt"), "w"))
 
     # Show values
     if is_print:
         print(f"\n{title}: \n{df}")
 
-    # Remove files
-    os.remove(os.path.join(PATH_TEMP, f"{name}.txt"))
-
-def save_mlflow_artifact_columns_unique(artifact_path, df, name, is_print = False):
+def save_columns_unique(directory_name, df, name, is_print = False):
     '''
         Save columns information about unique values 
     '''
-
+    # Verify artifacts path
+    if not os.path.exists(os.path.join(PATH_OUTPUT, "artifacts", directory_name)):
+        os.mkdir(os.path.join(PATH_OUTPUT, "artifacts", directory_name))
+        
     # Create files
     file_names = []
     for n, v in df.items():
@@ -69,13 +67,10 @@ def save_mlflow_artifact_columns_unique(artifact_path, df, name, is_print = Fals
         print(f"\nFeature {n}: {v.unique()}", file = open(os.path.join(PATH_TEMP, f"{name}_{n}.txt"), "w"))
     
     # Merge files
-    with open(os.path.join(PATH_TEMP, f"{name}.txt"), "w") as outfile:
+    with open(os.path.join(PATH_OUTPUT, "artifacts", directory_name, f"{name}.txt"), "w") as outfile:
         for f in file_names:
             with open(os.path.join(PATH_TEMP, f), "r") as infile:
                 outfile.write(infile.read())
-
-    # Save artifacs in mlflow repository
-    mlflow.log_artifact(os.path.join(PATH_TEMP, f"{name}.txt"), artifact_path = artifact_path)
 
     # Show values
     if is_print:
@@ -84,13 +79,16 @@ def save_mlflow_artifact_columns_unique(artifact_path, df, name, is_print = Fals
     # Remove files
     for n, v in df.items():
         os.remove(os.path.join(PATH_TEMP, f"{name}_{n}.txt"))
-    os.remove(os.path.join(PATH_TEMP, f"{name}.txt"))
 
-def save_mlflow_artifact_chart_bar(df, artifact_path, column_name):
+def save_chart_bar(df, directory_name, column_name):
     '''
         Save chart information using bar
     '''
     import matplotlib.pyplot as plt
+
+    # Verify artifacts path
+    if not os.path.exists(os.path.join(PATH_OUTPUT, "artifacts", directory_name)):
+        os.mkdir(os.path.join(PATH_OUTPUT, "artifacts", directory_name))
 
     # Create chart
     df_count = df[column_name].value_counts()
@@ -101,15 +99,19 @@ def save_mlflow_artifact_chart_bar(df, artifact_path, column_name):
     plt.title(f"Distribution of {column_name}")
     plt.gca().invert_yaxis()
 
-    # Save artifacs in mlflow repository
-    mlflow.log_figure(fig, f"{artifact_path}.png")
+    # Save the figure
+    plt.savefig(os.path.join(PATH_OUTPUT, "artifacts", directory_name, f"distribution_of_{column_name}.png"))
 
-def save_mlflow_artifact_chart_box_histogram(df, artifact_path, column_name, target_name):
+def save_chart_box_histogram(df, directory_name, column_name, target_name):
     '''
         Save chart information using boxplot and histograms
     '''
     import matplotlib.pyplot as plt
     import seaborn as sns
+
+    # Verify artifacts path
+    if not os.path.exists(os.path.join(PATH_OUTPUT, "artifacts", directory_name)):
+        os.mkdir(os.path.join(PATH_OUTPUT, "artifacts", directory_name))
 
     # Create chart
     fig, axs = plt.subplots(1, 2, figsize = (15, 5))
@@ -122,22 +124,23 @@ def save_mlflow_artifact_chart_box_histogram(df, artifact_path, column_name, tar
     axs[1].set_ylabel("Frequency")
     axs[1].set_title(f"Distribution of {column_name}")
 
-    # Save artifacs in mlflow repository
-    mlflow.log_figure(fig, f"{artifact_path}.png")
+    # Save the figure
+    plt.savefig(os.path.join(PATH_OUTPUT, "artifacts", directory_name, f"distribution_of_{column_name}.png"))
 
-def save_mlflow_artifact_chart_numeric_information(df):
+def save_chart_numeric_information(df, directory_name):
     '''
         Save chart information using boxplot and histograms
     '''
     import matplotlib.pyplot as plt
     import seaborn as sns
 
+    # Verify artifacts path
+    if not os.path.exists(os.path.join(PATH_OUTPUT, "artifacts", directory_name)):
+        os.mkdir(os.path.join(PATH_OUTPUT, "artifacts", directory_name))
+
     # Relation
     g = sns.PairGrid(df)
     g.map(sns.scatterplot)
-
-    # Save artifacs in mlflow repository
-    mlflow.log_figure(g.figure, "eda_numerical/numerical_relationship.png")
 
     # Correlation
     correlation_matrix = df.corr()
@@ -145,17 +148,67 @@ def save_mlflow_artifact_chart_numeric_information(df):
     sns.heatmap(correlation_matrix, annot = True, cmap = "coolwarm", square = True)
     plt.title("Pearson Correlation Heatmap")
 
-    # Save artifacs in mlflow repository
-    mlflow.log_figure(fig, "eda_numerical/Pearson_Correlation_Heatmap.png")
+    # Save the figure
+    plt.savefig(os.path.join(PATH_OUTPUT, "artifacts", directory_name, "Pearson_Correlation_Heatmap.png"))
 
-def save_dataset(df, name, target_name, dataset_source_url, context = "training"):
+def save_dataset(df, name):
     '''
         Save dataset
     '''
-    # Create an instance of a PandasDataset
-    dataset = mlflow.data.from_pandas(
-        df, source = dataset_source_url, name = name, targets = target_name
-    )
+    # Verify artifacts path
+    if not os.path.exists(os.path.join(PATH_OUTPUT, "data")):
+        os.mkdir(os.path.join(PATH_OUTPUT, "data"))
 
-    # Save data
-    mlflow.log_input(dataset, context = context)
+    # Save
+    df.to_csv(os.path.join(PATH_OUTPUT, "data", name), index = False)
+
+    print(f"File created {name}")
+
+def save_data_transformers(dt, name):
+    '''
+        Save data transformers like onehotencoder or numeric scaler
+    '''
+    import joblib
+
+    # Verify artifacts path
+    if not os.path.exists(os.path.join(PATH_OUTPUT, "transformers")):
+        os.mkdir(os.path.join(PATH_OUTPUT, "transformers"))
+
+    # Save
+    joblib.dump(dt, open(os.path.join(PATH_OUTPUT, "transformers", f"{name}.sav"), "wb"))
+
+    print(f"File created {name}.sav")
+
+def save_model(model, name):
+    '''
+        Save data transformers like onehotencoder or numeric scaler
+    '''
+    import joblib
+
+    # Verify artifacts path
+    if not os.path.exists(os.path.join(PATH_OUTPUT, "models")):
+        os.mkdir(os.path.join(PATH_OUTPUT, "models"))
+
+    # Save
+    joblib.dump(model, open(os.path.join(PATH_OUTPUT, "models", f"{name}.sav"), "wb"))
+
+    print(f"File created {name}.sav")
+
+def save_evaluation_info(directory_name, model_name, acc, prec, rec, f1, roc_auc, cm, cr):
+    '''
+        Save evaluation information
+    '''
+
+    # Verify artifacts path
+    if not os.path.exists(os.path.join(PATH_OUTPUT, "artifacts", directory_name)):
+        os.mkdir(os.path.join(PATH_OUTPUT, "artifacts", directory_name))
+
+    # Create information file
+    with open(os.path.join(PATH_OUTPUT, "artifacts", directory_name, f"metrics_{model_name}.txt"), "w") as f:
+        f.write(f"\nAccuracy: {acc}")
+        f.write(f"\nPrecision: {prec}")
+        f.write(f"\nRecall: {rec}")
+        f.write(f"\nF1: {f1}")
+        f.write(f"\nROC_AUC: {roc_auc}")
+        f.write(f"\nConfusion Matrix: \n{cm}")
+        f.write(f"\nClassification Report: \n{cr}")
