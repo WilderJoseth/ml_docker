@@ -1,5 +1,4 @@
-import mlflow
-from mlflow.models import infer_signature
+from scripts import utils
 
 target_variable = "income"
 
@@ -26,7 +25,6 @@ def split_data(df):
     print("y_train shape:", y_train.shape)
     print("y_val shape:", y_val.shape)
 
-    mlflow.log_params({"data_test_size": 0.2})
     print("\n------------------ END SPLITING DATA ------------------")
     return x_train, x_val, y_train, y_val
 
@@ -41,22 +39,14 @@ def logistic_regression(x_train, x_val, y_train, y_val):
     print("\n------------------ START LOGISTIC REGRESSION ------------------")
     from sklearn.linear_model import LogisticRegression
 
+    model_name = "sklearn_model_logistic_regression"
     hyperparameters = {"class_weight": "balanced", "penalty": "l2", "solver": "liblinear", "C": 100}
     lr = LogisticRegression(**hyperparameters)
     model = lr.fit(x_train, y_train)
-    evaluation(model, x_val, y_val)
+    evaluation(model, x_val, y_val, model_name)
     
-    # Infer the model signature
-    signature = infer_signature(x_train, lr.predict(x_train))
-
-    # Register model
-    mlflow.sklearn.log_model(
-        sk_model = model,
-        artifact_path = "sklearn_model_logistic_regression",
-        signature = signature,
-        input_example = x_train,
-        registered_model_name="sklearn_model_logistic_regression",
-    )
+    # Save model
+    utils.save_model(model, model_name)
     print("\n------------------ END LOGISTIC REGRESSION ------------------")
 
 def random_forest(x_train, x_val, y_train, y_val):
@@ -66,28 +56,17 @@ def random_forest(x_train, x_val, y_train, y_val):
     print("\n------------------ START RANDOM FOREST ------------------")
     from sklearn.ensemble import RandomForestClassifier
 
+    model_name = "sklearn_model_random_forest"
     hyperparameters = {"n_estimators": 500, "min_samples_split": 5, "min_samples_leaf": 1, "max_depth": 50, "class_weight": "balanced"}
     lr = RandomForestClassifier(**hyperparameters)
     model = lr.fit(x_train, y_train)
-
-    #mlflow.log_params(hyperparameters)
-
-    evaluation(model, x_val, y_val)
+    evaluation(model, x_val, y_val, model_name)
     
-    # Infer the model signature
-    signature = infer_signature(x_train, lr.predict(x_train))
-
-    # Register model
-    mlflow.sklearn.log_model(
-        sk_model = model,
-        artifact_path = "sklearn_model_random_forest",
-        signature = signature,
-        input_example = x_train,
-        registered_model_name="sklearn_model_random_forest",
-    )
+    # Save model
+    utils.save_model(model, model_name)
     print("\n------------------ END RANDOM FOREST ------------------")
 
-def evaluation(model, x_val, y_val):
+def evaluation(model, x_val, y_val, model_name):
     '''
         Evaluation model
     '''
@@ -100,25 +79,33 @@ def evaluation(model, x_val, y_val):
     y_prob = model.predict_proba(x_val)[:, 1]
 
     # Accuracy
-    print("\nAccuracy:", accuracy_score(y_val, y_pred))
+    acc = accuracy_score(y_val, y_pred)
+    print("\nAccuracy:", acc)
 
     # Precision
-    print("\nPrecision:", precision_score(y_val, y_pred))
+    prec = precision_score(y_val, y_pred)
+    print("\nPrecision:", prec)
 
     # Recall
-    print("\nRecall:", recall_score(y_val, y_pred))
+    rec = recall_score(y_val, y_pred)
+    print("\nRecall:", rec)
 
     # F1
-    print("\nF1:", f1_score(y_val, y_pred))
+    f1 = f1_score(y_val, y_pred)
+    print("\nF1:", f1)
 
     # ROC AUC Score
     roc_auc = roc_auc_score(y_val, y_prob)
     print("\nROC AUC Score:", roc_auc)
 
     # Confusion Matrix
+    cm = confusion_matrix(y_val, y_pred)
     print("\nConfusion Matrix:")
-    print(confusion_matrix(y_val, y_pred))
+    print(cm)
 
     # Classification Report
+    cr = classification_report(y_val, y_pred)
     print("\nClassification Report:")
-    print(classification_report(y_val, y_pred))
+    print(cr)
+
+    utils.save_evaluation_info("6_metrics", model_name, acc, prec, rec, f1, roc_auc, cm, cr)

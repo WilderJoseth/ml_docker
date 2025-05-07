@@ -1,30 +1,19 @@
 from flask import Flask, render_template, jsonify, request
 from process import prediction
 import os
-import pandas as pd
-import mlflow
 from dotenv import load_dotenv
 
 load_dotenv()
 
 # Read environemnt variables
-HOST_MLFLOW = os.getenv("HOST_MLFLOW")
-PORT_MLFLOW = os.getenv("PORT_MLFLOW")
 HOST_WEB = os.getenv("HOST_WEB")
 PORT_WEB = os.getenv("PORT_WEB")
 
-# Set mlflow url repository
-mlflow.set_tracking_uri(uri = f"http://{HOST_MLFLOW}:{PORT_MLFLOW}")
-
-# Input object
-PATH_DATA = os.path.join(os.getcwd(), "input/data")
-PATH_TRANSFORMER = os.path.join(os.getcwd(), "input/transformer")
-
 # Load input object
-categorical_transformer = prediction.get_transformer(os.path.join(PATH_TRANSFORMER, "categorical_transformer.sav"))
-numeric_transformer = prediction.get_transformer(os.path.join(PATH_TRANSFORMER, "numerical_transformer.sav"))
-model_logistic_regression = mlflow.sklearn.load_model("models:/sklearn_model_logistic_regression/1")
-model_random_forest = mlflow.sklearn.load_model("models:/sklearn_model_random_forest/1")
+categorical_transformer = prediction.get_transformer("categorical_transformer.sav")
+numeric_transformer = prediction.get_transformer("numerical_transformer.sav")
+model_logistic_regression = prediction.get_model("sklearn_model_logistic_regression.sav")
+model_random_forest = prediction.get_model("sklearn_model_random_forest.sav")
 
 # App configuration
 app = Flask(__name__)
@@ -33,7 +22,7 @@ app = Flask(__name__)
 @app.route("/", methods = ["GET"])
 def index():
     # Read data
-    df = pd.read_csv(os.path.join(PATH_DATA, "adult_cleaned.csv"))
+    df = prediction.get_data()
 
     # Load data from dataset
     data = {}

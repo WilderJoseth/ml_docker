@@ -1,9 +1,5 @@
 import pandas as pd
-import joblib
-import os
 from scripts import utils
-
-PATH_TRANSFORMER = os.path.join(os.getcwd(), "output/transformer")
 
 categorical_features = ["workclass", "education", "marital-status", "occupation", "relationship", "race", "sex", "native-country"]
 numeric_features = ["age", "fnlwgt", "education-num", "capital-gain", "capital-loss", "hours-per-week"]
@@ -38,10 +34,6 @@ def categorical(df, df_target):
         else:
             print(f"Fail to reject the null hypothesis: No significant association between {c} and {target_variable}.")
             hypothesis_results.append(f"Fail to reject the null hypothesis: No significant association between {c} and {target_variable}.")
-    
-    # Save results
-    df_hypothesis_results = pd.DataFrame(hypothesis_results)
-    utils.save_mlflow_artifact_dataframe("preparation", df_hypothesis_results, "categorical_hypothesis_testing", index = False)
 
     # Get transformer instance 
     # sparse_output = False to return the values as vectors
@@ -56,8 +48,7 @@ def categorical(df, df_target):
     print("\n------------------ END PREPARING CATEGORICAL DATA ------------------")
 
     # Save the transformer file
-    transformer_name = "categorical_transformer.sav"
-    joblib.dump(onehot_encoder, open(os.path.join(PATH_TRANSFORMER, transformer_name), "wb"))
+    utils.save_data_transformers(onehot_encoder, "categorical_transformer")
 
     return df_one_hot_encoder
 
@@ -75,8 +66,7 @@ def numerical(df):
     print("\n------------------ END PREPARING NUMERICAL DATA ------------------")
 
     # Save the transformer file
-    transformer_name = "numerical_transformer.sav"
-    joblib.dump(scaler, open(os.path.join(PATH_TRANSFORMER, transformer_name), "wb"))
+    utils.save_data_transformers(scaler, "numerical_transformer")
 
     return df_numeric
 
