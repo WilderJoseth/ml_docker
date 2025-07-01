@@ -8,5 +8,5 @@ KERNEL_PCA = "poly"
 ############ DATA PREPARATION ############
 
 ############ MODEL TRAINING ############
-PARAMS_MODEL = {"n_clusters": 4, "init": "Cao", "random_state": 42}
+PARAMS_MODEL = {"n_clusters": 3, "init": "Cao", "random_state": 42}
 ############ MODEL TRAINING ############

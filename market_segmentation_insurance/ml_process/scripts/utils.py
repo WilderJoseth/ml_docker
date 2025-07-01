@@ -3,7 +3,7 @@ import pickle
 
 PATH_OUTPUT = os.path.join(os.getcwd(), "output")
 
-def save_data_transformers(dt, name):
+def save_data_transformers(dt: object, name: str):
     '''
         Save data transformers like onehotencoder or numeric scaler
     '''
@@ -18,7 +18,7 @@ def save_data_transformers(dt, name):
 
     print(f"Transformer created {name}.pkl")
 
-def save_model(model, name):
+def save_model(model: object, name: str):
     '''
         Save models
     '''
