@@ -1,40 +1,16 @@
-from prefect import task, flow
+#from prefect import task, flow
 import pandas as pd
 import numpy as np
 from scripts import config, utils
 
-numeric_features = ["BALANCE", "BALANCE_FREQUENCY", "PURCHASES", "ONEOFF_PURCHASES", "INSTALLMENTS_PURCHASES", "CASH_ADVANCE", "PURCHASES_FREQUENCY", 
-                "ONEOFF_PURCHASES_FREQUENCY", "PURCHASES_INSTALLMENTS_FREQUENCY", "CASH_ADVANCE_FREQUENCY", "CASH_ADVANCE_TRX", "PURCHASES_TRX", 
-                "CREDIT_LIMIT", "PAYMENTS", "MINIMUM_PAYMENTS", "PRC_FULL_PAYMENT"]
-
-categorical_features = ["TENURE"]
-
-@flow(name = "Preparation data workflow", retries = 3, retry_delay_seconds = 20, timeout_seconds = 30)
+#@flow(name = "Preparation data workflow", retries = 3, retry_delay_seconds = 20, timeout_seconds = 30)
 def main(df: pd.DataFrame) -> pd.DataFrame:
     print("\n------------------ START PREPARING DATA ------------------")
-    df_cleaned = clean(df)
-    df_prepared = preparation(df_cleaned)
+    df_prepared = preparation(df)
     print("\n------------------ END PREPARING DATA ------------------")
     return df_prepared
 
-@task(name = "Clean data")
-def clean(df: pd.DataFrame) -> pd.DataFrame:
-    print("\n------------------ START CLEANING DATA ------------------")
-    print("\n------------------ START FILLING MISSING VALUES ------------------")
-    df["MINIMUM_PAYMENTS"] = df["MINIMUM_PAYMENTS"].fillna(df["MINIMUM_PAYMENTS"].median())
-    df["CREDIT_LIMIT"] = df["CREDIT_LIMIT"].fillna(df["CREDIT_LIMIT"].median())
-
-    print("Columns:", "MINIMUM_PAYMENTS, CREDIT_LIMIT")
-    print("\n------------------ END FILLING MISSING VALUES ------------------")
-
-    print("\n------------------ START REMOVING HIGH CARDINALITY VARIABLE ------------------")
-    df = df.drop(columns = "CUST_ID")
-    print("Columns:", "CUST_ID")
-    print("\n------------------ END REMOVING HIGH CARDINALITY VARIABLE ------------------")
-    print("\n------------------ END CLEANING DATA ------------------")
-    return df
-
-@task(name = "Preparation data")
+#@task(name = "Preparation data")
 def preparation(df: pd.DataFrame) -> pd.DataFrame:
     print("\n------------------ START PREPARING DATA ------------------")
     df_numeric = numerical(df)
@@ -53,14 +29,14 @@ def numerical(df: pd.DataFrame) -> pd.DataFrame:
     print("\n------------------ START TRANSFORMING NUMERICAL DATA ------------------")
     print("\n------------------ START SCALING DATA ------------------")
     scaler = StandardScaler()
-    x_scaled = scaler.fit_transform(df[numeric_features].values)
+    x_scaled = scaler.fit_transform(df[config.NUMERIC_FEATURES].values)
     print("\n------------------ END SCALING DATA ------------------")
     
     print("\n------------------ START REMOVING SKEWNESS DATA ------------------")
     print("\n------------------ Applying yeo-johnson method ------------------")
     pt = PowerTransformer(method = "yeo-johnson", standardize = False)
     x_transformed = pt.fit_transform(x_scaled)
-    df_numeric_no_skewness = pd.DataFrame(x_transformed, columns = numeric_features)
+    df_numeric_no_skewness = pd.DataFrame(x_transformed, columns = config.NUMERIC_FEATURES)
     print("\n------------------ END REMOVING SKEWNESS DATA ------------------")
     
     print("Shape:", df_numeric_no_skewness.shape)
@@ -76,7 +52,7 @@ def categorical(df: pd.DataFrame) -> pd.DataFrame:
     print("\n------------------ START TRANSFORMING CATEGORICAL DATA ------------------")
     print("\n------------------ Applying OneHotEncoder method ------------------")
     onehot_encoder = OneHotEncoder(sparse_output = False, drop = "first")
-    encoded_features = onehot_encoder.fit_transform(df[categorical_features])
+    encoded_features = onehot_encoder.fit_transform(df[config.CATEGORICAL_FEATURES])
     df_one_hot_encoder = pd.DataFrame(encoded_features, columns = onehot_encoder.get_feature_names_out())
     print("Shape:", df_one_hot_encoder.shape)
 

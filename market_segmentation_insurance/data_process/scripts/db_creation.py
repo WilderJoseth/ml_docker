@@ -59,7 +59,7 @@ def create_eda_data_table():
                         PAYMENTS DECIMAL(24, 6) NOT NULL,
                         MINIMUM_PAYMENTS DECIMAL(24, 6) NOT NULL,
                         PRC_FULL_PAYMENT DECIMAL(24, 6) NOT NULL,
-                        TENURE DECIMAL(24, 6) NOT NULL
+                        TENURE VARCHAR(2) NOT NULL
                     );
                     '''
     

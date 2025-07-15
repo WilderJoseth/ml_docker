@@ -10,8 +10,6 @@ services:
       POSTGRES_DB: market_segmentation_insurance_db
     networks:
       - my-bridge-network
-    #ports:
-    #  - "5432:5432"
 
   data_process:
     image: wilderjoseth/market-segmentation-insurance-data-process
@@ -19,7 +17,7 @@ services:
     build: ./data_process
     depends_on:
       - db
-    environment:
+    environment: # Custom-defined
       - HOST=db
       - DATABASE=market_segmentation_insurance_db
       - USER=postgres
@@ -33,6 +31,23 @@ services:
     networks:
       - my-bridge-network
 
+  ml_process:
+    image: wilderjoseth/market-segmentation-insurance-ml-process
+    container_name: market-segmentation-insurance-ml-process
+    build: ./ml_process
+    depends_on:
+      - data_process
+    environment: # Custom-defined
+      - HOST=db
+      - DATABASE=market_segmentation_insurance_db
+      - USER=postgres
+      - PASSWORD=${DB_PASSWORD}
+      - PORT=5432
+      - RETRIES_CONNECTION=3
+      - RETRIES_CONNECTION_SECONDS=2
+    networks:
+      - my-bridge-network
+      
 networks:
   my-bridge-network:
     driver: bridge

@@ -1,6 +1,10 @@
-############ DATA EXTRACTION ############
-FILE_NAME_INPUT = "Customer Data.csv"
-############ DATA EXTRACTION ############
+############ FEATURES ############
+NUMERIC_FEATURES = ["balance", "balance_frequency", "purchases", "oneoff_purchases", "installments_purchases", "cash_advance", "purchases_frequency", 
+                    "oneoff_purchases_frequency", "purchases_installments_frequency", "cash_advance_frequency", "cash_advance_trx", "purchases_trx", 
+                    "credit_limit", "payments", "minimum_payments", "prc_full_payment"]
+
+CATEGORICAL_FEATURES = ["tenure"]
+############ FEATURES ############
 
 ############ DATA PREPARATION ############
 N_COMPONENTS_PCA = 4
