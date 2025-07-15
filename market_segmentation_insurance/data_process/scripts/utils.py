@@ -1,6 +1,8 @@
 import os
+import time
 import psycopg2
 import psycopg2.extras as extras
+from psycopg2 import OperationalError
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -10,10 +12,23 @@ DATABASE = os.getenv("DATABASE")
 USER = os.getenv("USER")
 PASSWORD = os.getenv("PASSWORD")
 PORT = os.getenv("PORT")
+RETRIES_CONNECTION = int(os.getenv("RETRIES_CONNECTION"))
+RETRIES_CONNECTION_SECONDS = int(os.getenv("RETRIES_CONNECTION_SECONDS"))
+
+def db_connection():
+    for i in range(1, RETRIES_CONNECTION + 1):
+        try:
+            connection = psycopg2.connect(host = HOST, database = DATABASE, user = USER, password = PASSWORD, port = PORT)
+            print("Connection successful!")
+            return connection
+        except OperationalError as e:
+            print(f"Attempt {i}: Connection failed, retrying in {RETRIES_CONNECTION_SECONDS} seconds...")
+            time.sleep(RETRIES_CONNECTION_SECONDS)
+    raise OperationalError("Could not connect to the database after multiple attempts.")
 
 def db_execute_query(query):
     print("\n------------------ START QUERY EXECUTION ------------------")
-    connection = psycopg2.connect(host = HOST, database = DATABASE, user = USER, password = PASSWORD, port = PORT)
+    connection = db_connection()
     cursor = connection.cursor()
     cursor.execute(query)
     connection.commit()
@@ -23,7 +38,7 @@ def db_execute_query(query):
 
 def db_execute_query_select(query):
     print("\n------------------ START QUERY SELECT EXECUTION ------------------")
-    connection = psycopg2.connect(host = HOST, database = DATABASE, user = USER, password = PASSWORD, port = PORT)
+    connection = db_connection()
     cursor = connection.cursor()
     cursor.execute(query)
     rows = cursor.fetchall()
@@ -41,7 +56,7 @@ def db_insert_query_from_dataframe(df, table_name):
     query = "INSERT INTO %s(%s) VALUES %%s" % (table_name, columns)
     
     # Inserting data
-    connection = psycopg2.connect(host = HOST, database = DATABASE, user = USER, password = PASSWORD, port = PORT)
+    connection = db_connection()
     cursor = connection.cursor()
     try:
         extras.execute_values(cursor, query, tuples)

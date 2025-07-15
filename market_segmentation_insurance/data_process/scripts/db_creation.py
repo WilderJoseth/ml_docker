@@ -3,6 +3,7 @@ from scripts import utils
 def main():
     create_raw_data_table()
     create_eda_data_table()
+    create_missing_values_summary_table()
     
 def create_raw_data_table():
     print("\n------------------ START RAW_DATA_TABLE CREATION ------------------")
@@ -66,3 +67,19 @@ def create_eda_data_table():
     print("Table public.eda_data created")
     utils.db_execute_query(query_create)
     print("\n------------------ START EDA_DATA_TABLE CREATION ------------------")
+
+def create_missing_values_summary_table():
+    print("\n------------------ START MIISING_VALUES_SUMMARY_TABLE CREATION ------------------")
+    query_drop = "DROP TABLE IF EXISTS public.missing_values_summary;"
+    query_create = '''
+                    CREATE TABLE public.missing_values_summary(
+                        id SERIAL NOT NULL PRIMARY KEY,
+                        FEATURE VARCHAR(50) NOT NULL,
+                        FREQUENCY INTEGER NOT NULL
+                    );
+                    '''
+    
+    utils.db_execute_query(query_drop)
+    print("Table public.missing_values_summary created")
+    utils.db_execute_query(query_create)
+    print("\n------------------ START MIISING_VALUES_SUMMARY_TABLE CREATION ------------------")
