@@ -5,6 +5,9 @@ from scripts import config, utils
 
 #@flow(name = "Preparation data workflow", retries = 3, retry_delay_seconds = 20, timeout_seconds = 30)
 def main(df: pd.DataFrame) -> pd.DataFrame:
+    '''
+        Function that starts the whole process
+    '''
     print("\n------------------ START PREPARING DATA ------------------")
     df_prepared = preparation(df)
     print("\n------------------ END PREPARING DATA ------------------")

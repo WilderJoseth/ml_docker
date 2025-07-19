@@ -16,6 +16,9 @@ RETRIES_CONNECTION = int(os.getenv("RETRIES_CONNECTION"))
 RETRIES_CONNECTION_SECONDS = int(os.getenv("RETRIES_CONNECTION_SECONDS"))
 
 def db_connection():
+    '''
+        Function that gets connection
+    '''
     for i in range(1, RETRIES_CONNECTION + 1):
         try:
             connection = psycopg2.connect(host = HOST, database = DATABASE, user = USER, password = PASSWORD, port = PORT)
@@ -27,6 +30,9 @@ def db_connection():
     raise OperationalError("Could not connect to the database after multiple attempts.")
 
 def db_execute_query(query):
+    '''
+        Execute query like insert, update or delete
+    '''
     print("\n------------------ START QUERY EXECUTION ------------------")
     connection = db_connection()
     cursor = connection.cursor()
@@ -37,6 +43,9 @@ def db_execute_query(query):
     print("\n------------------ END QUERY EXECUTION ------------------")
 
 def db_execute_query_select(query):
+    '''
+        Execute query select
+    '''
     print("\n------------------ START QUERY SELECT EXECUTION ------------------")
     connection = db_connection()
     cursor = connection.cursor()
@@ -49,6 +58,9 @@ def db_execute_query_select(query):
     return rows
 
 def db_insert_query_from_dataframe(df, table_name):
+    '''
+        Execute multiple inserts from dataframe
+    '''
     print("\n------------------ START INSERT DATAFRAME EXECUTION ------------------")
     # Creating query
     tuples = [tuple(x) for x in df.to_numpy(dtype = object)]
@@ -68,3 +80,13 @@ def db_insert_query_from_dataframe(df, table_name):
         cursor.close()
         connection.close()
     print("\n------------------ END INSERT DATAFRAME EXECUTION ------------------")
+
+def validate_number(number_string):
+    '''
+        Function that validates if a value is number or not
+    '''
+    try:
+        float(number_string)
+        return True
+    except ValueError:
+        return False

@@ -25,7 +25,7 @@ services:
       - PORT=5432
       - FILE_NAME=CustomerData.csv
       - RETRIES_CONNECTION=3
-      - RETRIES_CONNECTION_SECONDS=2
+      - RETRIES_CONNECTION_SECONDS=5
     volumes:
       - input-vl:/app/input
     networks:
@@ -36,6 +36,7 @@ services:
     container_name: market-segmentation-insurance-ml-process
     build: ./ml_process
     depends_on:
+      - db
       - data_process
     environment: # Custom-defined
       - HOST=db
@@ -44,7 +45,9 @@ services:
       - PASSWORD=${DB_PASSWORD}
       - PORT=5432
       - RETRIES_CONNECTION=3
-      - RETRIES_CONNECTION_SECONDS=2
+      - RETRIES_CONNECTION_SECONDS=5
+    volumes:
+      - output-vl:/app/output
     networks:
       - my-bridge-network
       
@@ -55,3 +58,5 @@ networks:
 volumes:
   input-vl:
     external: true # Volume must be created beforehand and with the file in it
+  output-vl:
+    external: true
