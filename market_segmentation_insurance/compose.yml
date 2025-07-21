@@ -1,0 +1,62 @@
+services:
+
+  db:
+    image: postgres
+    container_name: market-segmentation-insurance-db
+    restart: always
+    #shm_size: 128mb # set shared memory limit when using docker compose
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: market_segmentation_insurance_db
+    networks:
+      - my-bridge-network
+
+  data_process:
+    image: wilderjoseth/market-segmentation-insurance-data-process
+    container_name: market-segmentation-insurance-data-process
+    build: ./data_process
+    depends_on:
+      - db
+    environment: # Custom-defined
+      - HOST=db
+      - DATABASE=market_segmentation_insurance_db
+      - USER=postgres
+      - PASSWORD=${DB_PASSWORD}
+      - PORT=5432
+      - FILE_NAME=CustomerData.csv
+      - RETRIES_CONNECTION=3
+      - RETRIES_CONNECTION_SECONDS=5
+    volumes:
+      - input-vl:/app/input
+    networks:
+      - my-bridge-network
+
+  ml_process:
+    image: wilderjoseth/market-segmentation-insurance-ml-process
+    container_name: market-segmentation-insurance-ml-process
+    build: ./ml_process
+    depends_on:
+      - db
+      - data_process
+    environment: # Custom-defined
+      - HOST=db
+      - DATABASE=market_segmentation_insurance_db
+      - USER=postgres
+      - PASSWORD=${DB_PASSWORD}
+      - PORT=5432
+      - RETRIES_CONNECTION=3
+      - RETRIES_CONNECTION_SECONDS=5
+    volumes:
+      - output-vl:/app/output
+    networks:
+      - my-bridge-network
+      
+networks:
+  my-bridge-network:
+    driver: bridge
+
+volumes:
+  input-vl:
+    external: true # Volume must be created beforehand and with the file in it
+  output-vl:
+    external: true
