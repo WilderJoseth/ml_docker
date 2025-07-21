@@ -53,3 +53,7 @@ docker build -t wilderjoseth/market-segmentation-insurance-data-process .
 # Create ml process image
 docker build -t wilderjoseth/market-segmentation-insurance-ml-process .
 ```
+
+### References
+
+* ML process notebook: <https://github.com/WilderJoseth/ml_notebooks/blob/main/unsupervised/tabular/market_segmentation_insurance/1_EDA.ipynb>
