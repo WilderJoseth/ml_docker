@@ -15,6 +15,9 @@ def main(df: pd.DataFrame) -> pd.DataFrame:
 
 #@task(name = "Preparation data")
 def preparation(df: pd.DataFrame) -> pd.DataFrame:
+    '''
+        Function that applies data transformation to get the data ready for ml training
+    '''
     print("\n------------------ START PREPARING DATA ------------------")
     df_numeric = numerical(df)
     df_numeric_pca = dimensionality_reduction(df_numeric)
@@ -26,6 +29,9 @@ def preparation(df: pd.DataFrame) -> pd.DataFrame:
     return df_prepared
 
 def numerical(df: pd.DataFrame) -> pd.DataFrame:
+    '''
+        Function that applies data transformation to get the data ready for ml training (numeric)
+    '''
     from sklearn.preprocessing import StandardScaler
     from sklearn.preprocessing import PowerTransformer
 
@@ -50,6 +56,9 @@ def numerical(df: pd.DataFrame) -> pd.DataFrame:
     return df_numeric_no_skewness
 
 def categorical(df: pd.DataFrame) -> pd.DataFrame:
+    '''
+        Function that applies data transformation to get the data ready for ml training (categorical)
+    '''
     from sklearn.preprocessing import OneHotEncoder
 
     print("\n------------------ START TRANSFORMING CATEGORICAL DATA ------------------")
@@ -64,6 +73,9 @@ def categorical(df: pd.DataFrame) -> pd.DataFrame:
     return df_one_hot_encoder
 
 def dimensionality_reduction(x_scaled: np.array) -> pd.DataFrame:
+    '''
+        Function that applies KernelPCA to reduce data dimensionality
+    '''
     from sklearn.decomposition import KernelPCA
 
     print("\n------------------ START DIMENSIONALITY REDUCTION ------------------")

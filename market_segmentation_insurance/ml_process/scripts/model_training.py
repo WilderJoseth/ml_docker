@@ -7,6 +7,9 @@ from mlflow.models import infer_signature
 
 #@flow(name = "Training process workflow", retries = 1, retry_delay_seconds = 20)
 def main(df: pd.DataFrame):
+    '''
+        Function that starts the whole process
+    '''
     print("\n------------------ START TRAINING ------------------")
     x_train = df.values
     train(x_train)
@@ -20,7 +23,7 @@ def train(x_train: np.array):
 
 def k_prototypes(x_train: np.array):
     '''
-        Train KPrototypes
+        Train using KPrototypes
     '''
     from kmodes.kprototypes import KPrototypes
     from sklearn.metrics import silhouette_score

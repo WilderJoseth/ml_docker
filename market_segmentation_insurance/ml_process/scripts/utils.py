@@ -89,13 +89,20 @@ def verify_data_process_is_ready():
         Function that verifies if data process service is completed
     '''
     for i in range(1, RETRIES_CONNECTION + 1):
-        rows = db_execute_query_select("SELECT is_done FROM public.process_data WHERE name = 'Data Process';")
-        is_done = bool(rows[0][0])
-        if is_done:
-            print("Data process service is ready")
-            return True
+        result_exists = db_execute_query_select("SELECT COUNT(1) FROM pg_tables WHERE schemaname = 'public' AND tablename  = 'process_data';")
+        if_exists = int(result_exists[0][0])
+        if if_exists > 0:
+            for j in range(1, RETRIES_CONNECTION + 1):
+                results_done = db_execute_query_select("SELECT is_done FROM public.process_data WHERE name = 'Data Process';")
+                is_done = bool(results_done[0][0])
+                if is_done:
+                    print("Data process service is ready")
+                    return True
+                else:
+                    print(f"Attempt {j}: Data process service is not ready yet, service is not finished, retrying in {RETRIES_CONNECTION_SECONDS} seconds...")
+                    time.sleep(RETRIES_CONNECTION_SECONDS)
         else:
-            print(f"Attempt {i}: Data process service is not ready yet, retrying in {RETRIES_CONNECTION_SECONDS} seconds...")
+            print(f"Attempt {i}: Data process service is not ready yet, table public.process_data does not exist, retrying in {RETRIES_CONNECTION_SECONDS} seconds...")
             time.sleep(RETRIES_CONNECTION_SECONDS)
     raise OperationalError("Data process service is not ready after multiple attempts.")
 
