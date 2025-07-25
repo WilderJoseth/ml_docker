@@ -1,4 +1,4 @@
-# Machine learning projects with docker
+# Deployment projects with docker
 
 This repository storeds machine learning projects which have been deployed using docker containers.
 
